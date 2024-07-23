@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  --background-primary: 0, 0, 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-primary));
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.navbar .nav-item a {
+  font-size: 16px;
+  color: #fff;
+  line-height: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+}
+
+
+.home-banner {
+  background-image: url('../../assets/img/manga-home-banner.webp');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 80vh;
+  position: relative;
+}
+
+.home-banner:before {
+  content: '';
+  position: absolute;
+  background: linear-gradient(180deg, #CC2E3300 0%, #000 100%);
+  height: 100%;
+  width: 100%;
+  left: 0;
+}
+
+.general-fill-btn {
+  display: inline-block;
+  line-height: 1;
+  background-color: #cc2e33;
+  font-size: 15px;
+  border-radius: 0;
+  color: #fff;
+  text-align: center;
+  transition: all .3s;
+}
+
+.general-border-btn {
+  display: inline-block;
+  line-height: 1;
+  background-color: transparent;
+  font-size: 15px;
+  border-radius: 0;
+  color: #fff;
+  text-align: center;
+  transition: all .3s;
+  border: 1px solid #fff;
+}
+
+.general-fill-btn:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.general-border-btn:hover {
+  color: #000;
+  background-color: #fff;
+}
+
+.on-hover {
+  background-color: transparent !important;
+}
+
+.on-hover:hover {
+  background-color: #cc2e33 !important;
+  color: #fff;
+}
+
+.home-banner h1 {
+  color: #fff;
+  font-family: "Poppins", Sans-serif;
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 56px;
+}
+
+.notice-slider label {
+  display: block;
+  color: #fff;
+  font-family: "Poppins", Sans-serif;
+  font-weight: 400;
+  padding: 4px 0;
+  background-color: #000;
+  max-width: 250px;
+  width: 100%;
+  text-align: center;
+  font-size: 24px;
+  margin-right: 15px;
+}
+
+.notice-slider marquee {
+  color: #000;
+  font-family: "Poppins", Sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.offering-section h2 {
+  color: #fa7a46;
+  font-family: "Poppins", Sans-serif;
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 56px;
+}
+
+.offering-section h4 {
+  color: #fa7a46;
+  font-family: "Poppins", Sans-serif;
+  font-size: 34px;
+  font-weight: 500;
+}
+
+.offering-section .offering-card img:hover {
+  transition: .3s ease-in-out;
+  transition-duration: .3s;
+  transition-property: transform;
+}
+
+.offering-section .offering-card img:hover {
+  transition: .3s ease-in-out;
+  transform: scale(1.1);
+}
+
+.subscribe-section .general-fill-btn {
+  border: 1px solid #fff;
+}
+
+.subscribe-section .general-fill-btn:hover {
+  background-color: transparent !important;
+  color: #fff;
+}
+
+/* Change the white to any color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px black inset !important;
+}

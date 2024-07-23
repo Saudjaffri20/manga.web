@@ -1,0 +1,15 @@
+====> Manga Web App <=====
+
+====> Database <====
+
+[] Mongo DB
+[] username/email: edeliver@edeliversolutions.net
+[] password: shiSSh3v4qBwGsQl
+
+====> Hosting <====
+
+[]username: edeliver@edeliversolutions.net
+[]password: lotr73ftr22
+
+
+
