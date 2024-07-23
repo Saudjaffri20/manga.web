@@ -22,4 +22,6 @@ const ProtectedRoutes = ({ children }) => {
     );
 };
 
+// Usage in your pages
+
 export default ProtectedRoutes;
