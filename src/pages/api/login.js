@@ -1,10 +1,6 @@
 import clientPromise from '@/lib/mongo/mongodb';
-import { serialize } from 'cookie';
-import Cookies from 'js-cookie'
-
-// export async function POST(req, res) {
-//     return res.json({ data: req.method });
-// }
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const handler = async (req, res) => {
     switch (req.method) {
@@ -36,7 +32,18 @@ const handlePost = async (req, res) => {
         const db = client.db("manga");
         const data = await db.collection("users").findOne({ 'email': body.email });
         if (data) {
-            return res.json({ status: 200, data: data });
+            const isPasswordValid = await bcrypt.compare(body.password, data.password);
+            if (!isPasswordValid) {
+                return res.json({ message: "Wrong Password ", error: true });
+            } else {
+                const id = data._id.toString();
+                const token = jwt.sign({ id: id, username: data.username }, process.env.JWT_SECRET, {
+                    expiresIn: '1h',
+                });
+                const result = await data;
+                result['token'] = token;
+                return res.json({ status: 200, data: result });
+            }
         } else {
             return res.json({ message: "User Doesn't Exists", error: true });
         }

@@ -1,8 +1,5 @@
 import clientPromise from '@/lib/mongo/mongodb';
-
-// export async function POST(req, res) {
-//     return res.json({ data: req.method });
-// }
+import bcrypt from 'bcryptjs';
 
 const handler = async (req, res) => {
     switch (req.method) {
@@ -33,6 +30,8 @@ const handlePost = async (req, res) => {
         const client = await clientPromise;
         const db = client.db("manga");
         const data = await db.collection("users").findOne({ 'email': body.email });
+        const hashedPassword = await bcrypt.hash(body.password, 10);
+
         if (data) {
             return res.json({ message: "User Aleady Exists", error: true });
         } else {
@@ -40,10 +39,12 @@ const handlePost = async (req, res) => {
             body['createdOn'] = new Date();
             body['isVerified'] = "";
             body['token'] = "";
-            body['userId'] = new Date().toISOString().split('T')[0].split('-')[0].slice() + new Date().toISOString().split('T')[0].split('-')[1].slice() + new Date().toISOString().split('T')[0].split('-')[2].slice() + new Date().toISOString().split('T')[1].split(':')[0].slice() + new Date().toISOString().split('T')[1].split(':')[1].slice() + new Date().toISOString().split('T')[1].split(':')[2].slice();
-            const inserted = await db.collection("users").insertOne(body);
-            return res.json({ data: inserted, error: false });
+            body['userId'] = new Date().toISOString().split('T')[0].split('-')[0].slice() + new Date().toISOString().split('T')[0].split('-')[1].slice() + new Date().toISOString().split('T')[0].split('-')[2].slice() + new Date().toISOString().split('T')[1].split(':')[0].slice() + new Date().toISOString().split('T')[1].split(':')[1].slice('.')[0].slice() + new Date().toISOString().split('T')[1].split(':')[2].slice().slice('.')[0].slice();
+            body['password'] = hashedPassword;
+            const result = await db.collection("users").insertOne(body);
+            return res.json({ data: result, error: false });
         }
+
     } catch (error) {
         return res.json({ error });
     }

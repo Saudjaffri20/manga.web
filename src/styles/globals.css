@@ -37,6 +37,16 @@ body {
   }
 }
 
+.link {
+  transition: all .2s ease-in-out;
+}
+
+.link:hover {
+  color: #cc2e33;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .navbar .nav-item a {
   font-size: 16px;
   color: #fff;
@@ -71,6 +81,7 @@ body {
   display: inline-block;
   line-height: 1;
   background-color: #cc2e33;
+  border: 1px solid #cc2e33;
   font-size: 15px;
   border-radius: 0;
   color: #fff;
@@ -92,6 +103,7 @@ body {
 
 .general-fill-btn:hover {
   background-color: #fff;
+  border-color: #fff;
   color: #000;
 }
 
@@ -102,10 +114,12 @@ body {
 
 .on-hover {
   background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 .on-hover:hover {
   background-color: #cc2e33 !important;
+  border-color: #cc2e33 !important;
   color: #fff;
 }
 
@@ -175,8 +189,14 @@ body {
 
 /* Change the white to any color */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active{
-    -webkit-box-shadow: 0 0 0 30px black inset !important;
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px black inset !important;
+}
+
+
+
+.article-card .general-fill-btn:hover {
+  border-color: #cc2e33 !important;
 }

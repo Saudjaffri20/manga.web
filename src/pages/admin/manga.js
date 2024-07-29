@@ -4,11 +4,27 @@ import React, { useState } from 'react'
 const Manga = () => {
   const [formData, setFormData] = useState({});
   const [fileData, setFileData] = useState(null);
+  const [fileCount, setFileCount] = useState(null);
 
   const handleFileChange = (event) => {
     // e.target.files[0]
     const { name, files } = event.target;
     setFileData({ ...fileData, [name]: files[0] });
+
+  };
+
+  const handlePdfChange = (event) => {
+    // e.target.files[0]
+    const { name, files } = event.target;
+    setFileData({ ...fileData, [name]: files[0] });
+
+    var reader = new FileReader();
+    reader.readAsBinaryString(files[0]);
+    reader.onloadend = function () {
+      var count = reader.result.match(/\/Type[\s]*\/Page[^s]/g).length;
+      setFileCount(count);
+    }
+
   };
 
   const handleSubmit = async (e) => {
@@ -19,21 +35,21 @@ const Manga = () => {
       if (!fileData) return;
 
       const formPostData = new FormData();
-      formPostData.append('article', fileData.article);
+      formPostData.append('file', fileData.article);
       formPostData.append('thumbnail', fileData.thumbnail);
       const res = await axios.post('/api/upload', formPostData);
 
       if (!res.data.error) {
         const obj = {
           'title': formData.title,
-          'price': formData.price,
+          'price': parseInt(formData.price),
           'description': formData.description,
-          'author_name': formData.author_name,
-          'article_name': res.data.data[0],
-          'thumbnail_name': res.data.data[1],
+          'author': formData.author_name,
+          'file': res.data.data[0],
+          'fileCount': fileCount,
+          'thumbnail': res.data.data[1],
         }
         const response = await axios.post('/api/article', obj)
-        console.log(response)
 
       }
 
@@ -62,7 +78,7 @@ const Manga = () => {
             <label htmlFor="author_name" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-[#cc2e33] peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Author Name</label>
           </div>
           <div className="relative z-0 w-full mb-5 group">
-            <input autoComplete="off" id="price" name="price" value={formData.price || ""} onChange={handleChange} className="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-[#cc2e33] peer" placeholder=" " />
+            <input type='number' autoComplete="off" id="price" name="price" value={formData.price || ""} onChange={handleChange} className="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-[#cc2e33] peer" placeholder=" " />
             <label htmlFor="price" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#cc2e33] peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Price</label>
           </div>
         </div>
@@ -77,7 +93,7 @@ const Manga = () => {
         </div>
         <div className="relative z-0 w-full mb-5 group">
           <label className="block mb-2 text-sm font-medium text-gray-500 dark:text-white" htmlFor="file_input">Upload file</label>
-          <input className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="file_input_help" id="file_input" type="file" name="article" onChange={handleFileChange} />
+          <input className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="file_input_help" id="file_input" type="file" name="article" onChange={handlePdfChange} />
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or GIF (MAX. 800x400px).</p>
         </div>
         <div className="flex items-start mb-5">

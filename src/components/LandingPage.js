@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import Placeholder from '@/assets/img/placeholder.png'
-import Abc from '@/assets/img/abc.webp'
-import Xyz from '@/assets/img/xyz.webp'
 import Image from 'next/image'
 import Link from 'next/link'
 import NovelsListingCard from './NovelsListingCard'
 import SignUpModal from './SignUpModal'
+import Cookies from 'js-cookie'
+import LoginModal from './LoginModal'
+import { useRouter } from 'next/router'
+import axios from 'axios'
+import { getToken } from '../utils/token'
 
 const offeringCard = [
     {
@@ -56,7 +59,7 @@ const getStarted = [
 const collection = [
     {
         url: '/',
-        placeholder: Abc,
+        thumbnail: '1722111306462_thumbnail.webp',
         title: 'Astra Lost in Space',
         price: '10.99',
         author: 'Masashi Kishimoto',
@@ -64,7 +67,7 @@ const collection = [
     },
     {
         url: '/',
-        placeholder: Abc,
+        thumbnail: '1722111306462_thumbnail.webp',
         title: 'Astra Lost in Space',
         price: '10.99',
         author: 'Masashi Kishimoto',
@@ -72,7 +75,7 @@ const collection = [
     },
     {
         url: '/',
-        placeholder: Abc,
+        thumbnail: '1722111306462_thumbnail.webp',
         title: 'Astra Lost in Space',
         price: '10.99',
         author: 'Masashi Kishimoto',
@@ -80,7 +83,7 @@ const collection = [
     },
     {
         url: '/',
-        placeholder: Abc,
+        thumbnail: '1722111306462_thumbnail.webp',
         title: 'Astra Lost in Space',
         price: '10.99',
         author: 'Masashi Kishimoto',
@@ -91,7 +94,7 @@ const collection = [
 const newRelease = [
     {
         url: '/',
-        placeholder: Xyz,
+        thumbnail: '1722111306462_thumbnail.webp',
         realaseTag: 'New Realse',
         title: 'Astra Lost in Space',
         price: '10.99',
@@ -100,7 +103,7 @@ const newRelease = [
     },
     {
         url: '/',
-        placeholder: Xyz,
+        thumbnail: '1722111306462_thumbnail.webp',
         realaseTag: 'New Realse',
         title: 'Astra Lost in Space',
         price: '10.99',
@@ -109,7 +112,7 @@ const newRelease = [
     },
     {
         url: '/',
-        placeholder: Xyz,
+        thumbnail: '1722111306462_thumbnail.webp',
         realaseTag: 'New Realse',
         title: 'Astra Lost in Space',
         price: '10.99',
@@ -118,7 +121,7 @@ const newRelease = [
     },
     {
         url: '/',
-        placeholder: Xyz,
+        thumbnail: '1722111306462_thumbnail.webp',
         realaseTag: 'New Realse',
         title: 'Astra Lost in Space',
         price: '10.99',
@@ -127,17 +130,80 @@ const newRelease = [
     },
 ]
 
-
 const LandingPage = () => {
 
-    const [modalIsOpen, setIsOpen] = useState(false);
+    const [openSignUpModal, setOpenSignUpModal] = useState(false);
+    const [openLoginModal, setOpenLoginModal] = useState(false);
+    const [latestArticle, setLatestArticle] = useState([]);
+    const router = useRouter();
 
-    function openModal() {
-        setIsOpen(true);
+    const closeSignUpModal = () => {
+        setOpenSignUpModal(false);
     }
 
-    function closeModal() {
-        setIsOpen(false);
+    const closeLoginModal = () => {
+        setOpenLoginModal(false);
+    }
+
+    const loginModal = () => {
+        closeSignUpModal();
+        setOpenLoginModal(true);
+    }
+
+    const signUpModal = () => {
+        closeLoginModal();
+        setOpenSignUpModal(true);
+    }
+
+    const buyNow = (event, item) => {
+        event.preventDefault();
+        const token = getToken();
+        if (token) {
+            if (item.isPaid) {
+                router.push('/preview?filename=' + item.file + '&count=' + item.fileCount);
+            } else {
+                router.push('/payment?id=' + item.productId);
+            }
+        } else {
+            setOpenLoginModal(true);
+        }
+    }
+
+    useEffect(() => {
+        getDataByApi();
+    }, [])
+
+
+    const getDataByApi = async (e) => {
+        try {
+            const id = Cookies.get('user_id')
+            let url = '/api/article';
+            let subscription;
+            if (id) {
+                url = `/api/article?userId=${id}`;
+                subscription = await axios.get(`/api/subscription?userId=${id}`)
+            }
+            const response = await axios.get(url)
+            if (!response.data.error) {
+                if (response.data.data.length > 0 && subscription && subscription != undefined && !subscription.data.error) {
+                    const data = response.data.data;
+                    for (let index = 0; index < data.length; index++) {
+                        if (subscription?.data?.data?.products.includes(data[index].productId)) {
+                            data[index].isPaid = true;
+                        } else {
+                            data[index].isPaid = false;
+                        }
+                    }
+                    setLatestArticle(data);
+                } else {
+                    setLatestArticle(response.data.data);
+                }
+            } else {
+                setLatestArticle(collection);
+            }
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return (
@@ -150,7 +216,7 @@ const LandingPage = () => {
                             <p className='leading-[1.8]'>Welcome to Manga Pointer, your ultimate destination for discovering the best manga novels and series. Whether you’re a seasoned manga enthusiast or a newcomer, we’ve got you covered with curated collections, insightful reviews, and the latest releases.</p>
                             <div className='flex gap-8 mt-12'>
                                 <button className='general-fill-btn py-4 px-8' >Start Exploring Now</button>
-                                <button className='general-fill-btn on-hover py-4 px-8' onClick={openModal}>Browse Collection</button>
+                                <button className='general-fill-btn on-hover py-4 px-8'>Browse Collection</button>
                             </div>
                         </div>
                     </div>
@@ -216,8 +282,8 @@ const LandingPage = () => {
                                 </div>
                                 <div className='grid grid-cols-4 gap-5'>
                                     {
-                                        collection.map((item, index) => (
-                                            <NovelsListingCard item={item} key={index} />
+                                        latestArticle.map((item, index) => (
+                                            <NovelsListingCard item={item} key={index} buyNow={buyNow} />
                                         ))
                                     }
                                 </div>
@@ -256,7 +322,8 @@ const LandingPage = () => {
                 </section>
             </div>
 
-            <SignUpModal open={modalIsOpen} close={closeModal} />
+            <SignUpModal open={openSignUpModal} close={closeSignUpModal} openLoginModal={loginModal} />
+            <LoginModal open={openLoginModal} close={closeLoginModal} openSignUpModal={signUpModal} />
         </>
     )
 }
