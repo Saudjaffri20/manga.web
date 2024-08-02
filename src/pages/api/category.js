@@ -1,12 +1,7 @@
 import clientPromise from '@/lib/mongo/mongodb';
 
-export  default async function (req, res) {
-    try {
-        const client = await clientPromise;
-        const db = client.db("manga");
-        const allPosts = await db.collection("manga_categories").find({}).toArray();
-        return res.json({ status: 200, data: allPosts });
-    } catch (error) {
-        return res.json({ error });
-    }
+// pages/api/test.js
+export default function handler(req, res) {
+    console.log('MongoDB URI:', process.env.MONGODB_URI);
+    res.status(200).json({ message: 'Check console for MongoDB URI' });
 }

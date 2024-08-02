@@ -10,12 +10,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-icons/all-files": "^4.1.0",
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
+    "@stripe/react-stripe-js": "^2.7.3",
+    "@stripe/stripe-js": "^4.1.0",
     "@types/formidable": "^3.4.5",
     "axios": "^1.7.2",
+    "bcryptjs": "^2.4.3",
     "cookie": "^0.6.0",
     "formidable": "^3.5.1",
     "iron-session": "^8.0.2",
     "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.8.0",
     "multer": "^1.4.5-lts.1",
     "next": "14.2.5",
@@ -23,9 +30,14 @@
     "next-connect": "^1.0.0",
     "next-cookies": "^2.0.3",
     "nookies": "^2.5.2",
+    "pdfjs-dist": "^3.1.81",
     "react": "^18",
     "react-dom": "^18",
-    "react-modal": "^3.16.1"
+    "react-icons": "^5.2.1",
+    "react-modal": "^3.16.1",
+    "react-pageflip": "^2.0.3",
+    "react-pdf": "^5.1.0",
+    "stripe": "^16.5.0"
   },
   "devDependencies": {
     "@types/node": "^20",

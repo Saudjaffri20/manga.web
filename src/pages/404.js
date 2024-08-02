@@ -15,19 +15,9 @@ export default function Custom404() {
     }, []);
 
     return (
-        <div className="container">
+        <div className="container m-auto text-center">
             <h1>Page Not Found</h1>
             <p>Redirecting you to the home page...</p>
-            <style jsx>{`
-        .container {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          flex-direction: column;
-          text-align: center;
-        }
-      `}</style>
         </div>
     );
 }
