@@ -10,6 +10,10 @@ import { useEffect, useState } from 'react';
 import { FaRegUserCircle } from "react-icons/fa";
 import { getToken, removeToken } from '../utils/token';
 
+import { useEffect, useState } from 'react';
+import { FaRegUserCircle } from "react-icons/fa";
+import { getToken, removeToken } from '../utils/token';
+
 
 
 const Header = () => {
