@@ -16,7 +16,6 @@ const handleGet = async (req, res) => {
     try {
         // const id = req.query.userId;
         const client = await clientPromise;
-        debugger
         const db = client.db("manga");
         const result = await db.collection("Product").find({}).limit(4).toArray();
         return res.json({ status: 200, data: result });

@@ -24,7 +24,7 @@ const NovelsListingCard = ({ item, buyNow }) => {
                 <h5 className='text-[#000] text-[18px] font-medium my-2'>${item.price}</h5>
                 <h6 className='text-[#7a7a7a] text-[14px] mb-0'>Author: {item.author}</h6>
                 <p className='text-[#7a7a7a] text-[14px] my-6'>Description: {item.description}</p>
-                <button href={'#'} className="general-fill-btn py-3 px-10" onClick={(event) => buyNow(event, item)}>{item.isPaid ? 'Read More' : 'Buy Now'}</button>
+                <button href={'#'} className="general-fill-btn py-3 px-10" onClick={(event) => buyNow(event, item)}>{item.isPaid ? 'Read More' : item.isInCart ? 'View Cart' : 'Add to Cart'}</button>
             </div>
         </div>
     )

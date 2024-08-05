@@ -4,11 +4,12 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie'
+import { removeALLCartToLocalStorage } from '@/utils/token';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 
-const CheckoutForm = ({ clientSecret, productId }) => {
+const CheckoutForm = ({ clientSecret, productList }) => {
     const router = useRouter();
     const stripe = useStripe();
     const elements = useElements();
@@ -34,24 +35,25 @@ const CheckoutForm = ({ clientSecret, productId }) => {
             setError(error.message);
             setLoading(false);
         } else {
-            setSubscription('John Doe', productId);
+            setSubscription('John Doe', productList);
         }
 
     };
 
-    const setSubscription = async (name, productId) => {
+    const setSubscription = async (name, productList) => {
         const obj = {
             userId: Cookies.get('user_id'),
-            productId, productId
+            products: productList
         }
         const res = await axios.post(`/api/subscription`, obj);
         if (!res.data.error) {
             setLoading(false);
             setPaymentSuccess(true);
+            removeALLCartToLocalStorage();
             setTimeout(() => {
                 router.push('/');
                 setPaymentSuccess(false);
-            }, 1500);
+            }, 1000);
         }
     };
 
@@ -97,25 +99,27 @@ const Payment = () => {
     const router = useRouter();
     const { query } = router;
     const [clientSecret, setClientSecret] = useState('');
+    const [productList, setProductList] = useState('');
 
-    const createPaymentIntent = async (id) => {
-        // const res = await axios.post(`/api/stripe_checkout`, {amount: 2000 });
-        const res = await axios.post(`/api/stripe_checkout`, { productId: id });
-        const { clientSecret } = await res.data;
-        setClientSecret(clientSecret);
+    const createPaymentIntent = async (amount) => {
+        // const res = await axios.post(`/api/stripe_checkout`, { amount: amount });
+        const res = await axios.post(`/api/stripe_checkout`, { userId: Cookies.get('user_id'), });
+        if (!res.data.error) {
+            const { clientSecret, data } = await res.data;
+            setClientSecret(clientSecret);
+            setProductList(data);
+        }
     };
 
     useEffect(() => {
-        if (query.id && query.id != undefined) {
-            createPaymentIntent(query.id);
-        }
-    }, [query]);
+        createPaymentIntent();
+    }, []);
 
     return (
         <div>
             {clientSecret && (
                 <Elements stripe={stripePromise}>
-                    <CheckoutForm clientSecret={clientSecret} productId={query.id} />
+                    <CheckoutForm clientSecret={clientSecret} productList={productList} />
                 </Elements>
             )}
         </div>

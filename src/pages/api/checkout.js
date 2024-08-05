@@ -34,20 +34,18 @@ const handlePost = async (req, res) => {
         const body = await req.body;
         const client = await clientPromise;
         const db = client.db("manga");
-        const isUserExists = await db.collection("Subscription").findOne({ 'userId': body.userId });
+        body['totalAmount'] = body.totalAmount;
+        const isUserExists = await db.collection("CheckOut").findOne({ 'userId': body.userId });
         if (isUserExists) {
-            const products = isUserExists['products'];
-            for (let index = 0; index < body['products'].length; index++) {
-                products.push(body['products'][index]);
-            }
-            const result = await db.collection("Subscription").updateOne(
+            const products = body['products'];
+            await db.collection("CheckOut").updateOne(
                 { "_id": Object(isUserExists._id) },
                 { "$set": { products: products } },
             );
         } else {
-            await db.collection("Subscription").insertOne(body);
+            await db.collection("CheckOut").insertOne(body);
         }
-        return res.json({ message: 'subscribed', error: false });
+        return res.json({ message: 'Payment Added', error: false });
     } catch (error) {
         return res.json({ error });
     }

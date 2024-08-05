@@ -8,7 +8,7 @@ import Cookies from 'js-cookie'
 import LoginModal from './LoginModal'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import { getToken } from '../utils/token'
+import { getToken, setCartListToLocalStorage, getCartListToLocalStorage } from '@/utils/token'
 
 const offeringCard = [
     {
@@ -35,24 +35,24 @@ const offeringCard = [
 
 const getStarted = [
     {
-        label: 'About MP',
-        url: '/collection',
+        label: 'The Impact of Manga on Pop Culture How Manga Has Influenced Fashion, Film, Literature, Technology, and More',
+        url: 'https://mangapointer.com/the-impact-of-manga-on-pop-culture-how-manga-has-influenced-fashion-film-literature-technology-and-more/',
     },
     {
-        label: 'Reedem Coupons',
-        url: '/collection',
+        label: 'Manga Culture Around the World The Global Influence of Manga and Its Adaptations',
+        url: 'https://mangapointer.com/manga-culture-around-the-world-the-global-influence-of-manga-and-its-adaptations/',
     },
     {
-        label: 'Reedem Gifted eBooks',
-        url: '/collection',
+        label: 'Exploring the Most Iconic Manga Genres An Overview of Popular Manga Genres with Essential Reads (IMHO)',
+        url: 'https://mangapointer.com/exploring-the-most-iconic-manga-genres-an-overview-of-popular-manga-genres-with-essential-reads-imho/',
     },
     {
-        label: 'FAQ',
-        url: '/collection',
+        label: 'Classic Manga Series Everyone Should Read Timeless Manga That Have Left a Lasting Impact on the Genre',
+        url: 'https://mangapointer.com/classic-manga-series-everyone-should-read-timeless-manga-that-have-left-a-lasting-impact-on-the-genre/',
     },
     {
-        label: 'Point Affiliate Program',
-        url: '/collection',
+        label: 'A Brief Summary of the Evolution of Manga Art Styles Over the Decades',
+        url: 'https://mangapointer.com/a-brief-summary-of-the-evolution-of-manga-art-styles-over-the-decades/',
     },
 ]
 
@@ -162,7 +162,21 @@ const LandingPage = () => {
             if (item.isPaid) {
                 router.push('/preview?filename=' + item.file + '&count=' + item.fileCount);
             } else {
-                router.push('/payment?id=' + item.productId);
+                let cartList = getCartListToLocalStorage();
+                if (cartList && cartList != null && cartList.length > 0) {
+                    if (cartList.includes(item.productId)) {
+                        router.push('/cart');
+                    } else {
+                        let modifiedCartList = cartList;
+                        modifiedCartList.push(item.productId);
+                        setCartListToLocalStorage(modifiedCartList);
+                    }
+                } else {
+                    let modifiedCartList = [];
+                    modifiedCartList.push(item.productId);
+                    setCartListToLocalStorage(modifiedCartList);
+                }
+                getDataByApi();
             }
         } else {
             setOpenLoginModal(true);
@@ -183,7 +197,8 @@ const LandingPage = () => {
                 url = `/api/article?userId=${id}`;
                 subscription = await axios.get(`/api/subscription?userId=${id}`)
             }
-            const response = await axios.get(url)
+            const response = await axios.get(url);
+            let cartList = getCartListToLocalStorage();
             if (!response.data.error) {
                 if (response.data.data.length > 0 && subscription && subscription != undefined && !subscription.data.error) {
                     const data = response.data.data;
@@ -193,10 +208,26 @@ const LandingPage = () => {
                         } else {
                             data[index].isPaid = false;
                         }
+                        if (cartList && cartList != null && cartList.includes(data[index].productId)) {
+                            data[index].isInCart = true;
+                        } else {
+                            data[index].isInCart = false;
+                        }
                     }
                     setLatestArticle(data);
                 } else {
-                    setLatestArticle(response.data.data);
+                    const data = response.data.data;
+                    const token = getToken();
+                    if (token) {
+                        for (let index = 0; index < data.length; index++) {
+                            if (cartList && cartList != null && cartList.length > 0 && cartList.includes(data[index].productId)) {
+                                data[index].isInCart = true;
+                            } else {
+                                data[index].isInCart = false;
+                            }
+                        }
+                    }
+                    setLatestArticle(data);
                 }
             } else {
                 setLatestArticle(collection);
@@ -226,12 +257,11 @@ const LandingPage = () => {
                         <div className='flex bg-white p-2 items-center'>
                             <label>Notice</label>
                             <marquee>
-                                <strong>Kinnikuman&apos;s 45th Anniversary:</strong> The beloved manga series Kinnikuman is celebrating its 45th anniversary with a special exhibition in Tokyo. Fans can look forward to a unique 45th-anniversary figure capturing Kinnikuman in his iconic pose  |
-                                <strong>Elden Ring Comedy Manga:</strong> A new comedy manga based on the popular video game Elden Ring is set to release. This manga will focus on the game&apos;s NPCs, offering fans a humorous take on the characters they&apos;ve come to know through lore videos  | <strong>The Essential Manga Guide:</strong> Crunchyroll&apos;s senior features editor, Briana Lawrence, has authored &apos;The Essential Manga Guide: 50 Series Every Manga Fan Should Know.&apos; This guide serves as a comprehensive primer on manga for both long-time enthusiasts and newcomers
+                                <strong>Stay tune for more exciting news! </strong> Don't Miss Out! Sign up for updates and our newsletters!
                             </marquee>
                         </div>
                     </section>
-                    <section className='offering-section py-[100px]'>
+                    {/* <section className='offering-section py-[100px]'>
                         <h2 className='text-center mb-4'>Discover Our Offerings</h2>
                         <p className='text-center text-[20px] mb-[60px]'>Join Our Community of Manga Lovers</p>
                         <div className="grid grid-cols-4 gap-5">
@@ -255,19 +285,19 @@ const LandingPage = () => {
                         <div className='text-center mt-[80px]' >
                             <button className='general-fill-btn py-5 px-12 font-medium'>Get Started</button>
                         </div>
-                    </section>
+                    </section> */}
                 </div>
                 <div className='bg-[#334155] h-[1px]'></div>
                 <section className='px-20 py-10'>
                     <div className='grid grid-cols-4'>
-                        <div className='border border-[#334155] p-2 mr-10'>
-                            <div className='border border-[#dddddd]'>
-                                <h5 className='text-[#000] text-[20px] font-medium mb-0 p-2 bg-white'>Get Started</h5>
-                                <ul className='px-9 py-12'>
+                        <div className='border border-[#334155] p-4 mr-10'>
+                            <div className=''>
+                                <h5 className='text-[#000] text-[20px] font-medium mb-0 p-2 bg-white'>Recent Posts</h5>
+                                <ul className='py-5'>
                                     {
                                         getStarted.map((item, index) => (
                                             <li key={index} className='flex gap-4 mb-6'>
-                                                <Link href={item.url} className='underline text-[16px] text-[#fff] hover:text-[#fa7a46]'>{item.label}</Link>
+                                                <Link target='_blank' href={item.url} className='font-light text-[15px] text-[#fff] hover:underline'>{item.label}</Link>
                                             </li>
                                         ))
                                     }
@@ -277,17 +307,21 @@ const LandingPage = () => {
                         <div className='col-span-3'>
                             <div className='border border-[#334155] p-2'>
                                 <div className='offering-section'>
-                                    <h2 className='text-center my-4'>Collections of the Month</h2>
-                                    <p className='text-center text-[20px] mb-[60px]'>Top Picks and Exciting New Releases</p>
+                                    <h2 className='text-center my-4'>Featured Creators</h2>
+                                    <p className='text-center text-[20px] mb-[30px]'>Top Picks and Exciting New Releases</p>
                                 </div>
-                                <div className='grid grid-cols-4 gap-5'>
+                                <div className='bg-[#334155] h-[1px] mb-[30px]'></div>
+                                <div className='grid grid-cols-3 gap-5'>
                                     {
                                         latestArticle.map((item, index) => (
                                             <NovelsListingCard item={item} key={index} buyNow={buyNow} />
                                         ))
                                     }
                                 </div>
-                                <div className='bg-[#334155] h-[1px] my-20'></div>
+                                <div className='text-center my-[50px]' >
+                                    <button className='general-fill-btn py-4 px-8 font-medium'>Load More</button>
+                                </div>
+                                {/* <div className='bg-[#334155] h-[1px] my-20'></div>
                                 <div className='offering-section'>
                                     <h2 className='text-center my-4'>New Releases</h2>
                                     <p className='text-center text-[20px] mb-[60px]'>Discover the Latest Must-Read Manga Novels</p>
@@ -301,15 +335,15 @@ const LandingPage = () => {
                                 </div>
                                 <div className='text-center my-[50px]' >
                                     <button className='general-border-btn py-5 px-12 font-medium'>Get Started</button>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
                 </section>
                 <div className='bg-[#334155] h-[1px]'></div>
                 <section className='offering-section py-[100px]'>
-                    <h2 className='text-center mb-4'>Monthly Ranking</h2>
-                    <p className='text-center text-[20px] mb-[60px]'>Top Reads of the Month</p>
+                    {/* <h2 className='text-center mb-4'>Monthly Ranking</h2>
+                    <p className='text-center text-[20px] mb-[60px]'>Top Reads of the Month</p> */}
                     <div className='sub-heading mb-[50px]'>
                         <h4 className='text-center mb-4'>Subscribe</h4>
                         <p className='text-center text-[16px] text-[#7a7a7a] mb-0'>Stay up-to-date with the latest manga news, releases, and updates straight to your inbox. </p>

@@ -9,6 +9,7 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
+  transition: all .2s ease-in-out;
 }
 
 :root {
@@ -37,8 +38,16 @@ body {
   }
 }
 
+.bg-primary {
+  background: rgb(var(--background-primary));
+}
+
 .link {
   transition: all .2s ease-in-out;
+}
+
+.red-color {
+  color: #cc2e33 !important;
 }
 
 .link:hover {
@@ -56,11 +65,18 @@ body {
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
+  font-weight: 300;
+  transition: all .2s ease-in-out;
+}
+
+.navbar .nav-item a:hover {
+  color: #cc2e33;
 }
 
 
 .home-banner {
-  background-image: url('../../assets/img/manga-home-banner.webp');
+  /* background-image: url('../../assets/img/manga-home-banner.webp'); */
+  background-image: url('../../assets/img/mp_background.webp');
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
