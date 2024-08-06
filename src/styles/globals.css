@@ -130,7 +130,7 @@ body {
 
 .on-hover {
   background-color: transparent !important;
-  border-color: transparent !important;
+  border-color: #fff !important;
 }
 
 .on-hover:hover {

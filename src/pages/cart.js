@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { LiaTimesSolid } from "react-icons/lia";
 import { removeCartListToLocalStorage, getCartListToLocalStorage } from "@/utils/token";
 import Cookies from 'js-cookie'
-import Loader from '../components/Loader';
+import Loader from '@/components/Loader';
+import ProtectedRoutes from '@/components/ProtectedRoutes';
 
 const Cart = () => {
 
@@ -46,7 +47,7 @@ const Cart = () => {
     }
 
     const cancel = (productId) => {
-        const cartList = removeCartListToLocalStorage();
+        const cartList = removeCartListToLocalStorage(productId);
         const data = latestArticle;
         const array = [];
         let price = 0;
@@ -85,7 +86,7 @@ const Cart = () => {
                                 <td className="border px-4 py-2">1</td>
                                 <td className="border px-4 py-2">${item.price}</td>
                                 <td className="border px-4 py-2 text-center">
-                                    <LiaTimesSolid size={20} color='white' className="red-color" onClick={() => cancel(item.productId)} />
+                                    <LiaTimesSolid size={20} color='white' className="red-color cursor-pointer" onClick={() => cancel(item.productId)} />
                                 </td>
                             </tr>
                         ))
@@ -105,65 +106,93 @@ const CartTotals = ({ totalAmount }) => {
     const router = useRouter();
 
     const [loader, setLoader] = useState(false);
+    const [discountCode, setDiscountCode] = useState("");
+    const [error, setError] = useState({ msg: '', error: false, success: false });
+    const [discountAmount, setDiscountAmount] = useState(null);
+    const [cartError, setCartError] = useState({ msg: '', error: false });
+
     const proceedToCheckout = async () => {
         try {
             setLoader(true)
             const products = getCartListToLocalStorage();
+            const amount = discountAmount ? discountAmount : totalAmount
             const obj = {
                 userId: Cookies.get('user_id'),
-                totalAmount: Number(totalAmount),
-                products: products
+                totalAmount: Number(amount),
+                products: products,
+                isCouponCodeApplied: discountAmount ? true : false
             }
-            const res = await axios.post(`/api/checkout`, obj);
-            if (!res.data.error) {
-                setLoader(false)
-                router.push(`/payment`)
+            if (products.length > 0) {
+                const res = await axios.post(`/api/checkout`, obj);
+                if (!res.data.error) {
+                    router.push(`/payment?id=${res.data.id}`)
+                }
+            } else {
+                setCartError({ msg: 'Your Cart is Empty!', error: true })
             }
+            setLoader(false)
         } catch (error) {
             console.log(error)
         }
     }
 
-    return (
-        <div className="flex py-8">
-            <div className="flex-grow">
-                <div className="flex">
-                    <input
-                        type="text"
-                        placeholder="Coupon code"
-                        className="border px-4 py-2 w-1/3 mr-4"
-                    />
-                    <button className="px-4 py-2 bg-blue-500 text-white">Apply coupon</button>
-                </div>
-            </div>
-            <div className="flex-grow">
-                <h1 className="text-2xl font-bold mb-6">Cart totals</h1>
-                <div className="border border-gray-300 p-4 rounded-md">
-                    <div className="flex justify-between py-2">
-                        <span className="font-semibold">Subtotal</span>
-                        <span>${totalAmount}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-t border-gray-300">
-                        <span className="font-semibold">Shipping</span>
-                        <div>
-                            <p className="text-green-500">Free shipping</p>
-                            <p>Shipping to <span className="font-semibold">NY</span>.</p>
-                            <a href="#" className="text-blue-500">Change address</a>
-                        </div>
-                    </div>
-                    <div className="flex justify-between py-2 border-t border-gray-300">
-                        <span className="font-semibold">Total</span>
-                        <span>${totalAmount}</span>
-                    </div>
-                    <button className="w-full py-2 mt-4 bg-blue-500 text-white rounded-md" onClick={proceedToCheckout}>
-                        {
-                            loader ? <Loader /> : 'Proceed to checkout'
-                        }
-                    </button>
-                </div>
-            </div>
+    const applyDiscountCode = async () => {
+        if ('MPWELCOME20' === discountCode) {
+            const discount = totalAmount - (totalAmount * 0.20);
+            const res = await axios.get(`/api/coupon?userId=${Cookies.get('user_id')}`);
+            if (!res.data.error) {
+                if (!res.data.data.isCouponUser) {
+                    setDiscountAmount(discount);
+                    setError({ msg: 'Code Applied', error: false, success: true })
+                } else {
+                    setError({ msg: 'You Already Use Code', error: true, success: false })
+                }
+            }
+        } else {
+            setError({ msg: 'Code Invlid', error: true, success: false })
+        }
+    }
 
-        </div>
+    return (
+        <ProtectedRoutes>
+            <div className="flex py-8">
+                <div className="flex-grow">
+                    <div className="flex items-start">
+                        <div className="relative z-0 group me-4">
+                            <input type='text' onChange={(e) => setDiscountCode(e.target.value)} autoComplete="off" id="discountCode" name="discountCode" value={discountCode || ""} className="block py-2.5 px-0 w-full text-sm text-white bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-[#cc2e33] peer" placeholder=" " required />
+                            <label htmlFor="discountCode" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-[#cc2e33] peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Discount Code</label>
+                            {error.error && <span class="flex items-center tracking-wide text-red-500 text-xs mt-2">{error.msg}</span>}
+                            {error.success && <span class="flex items-center tracking-wide text-green-500 text-xs mt-2">{error.msg}</span>}
+                        </div>
+                        <button onClick={applyDiscountCode} className="px-4 py-2 bg-gray-800 duration-200 focus:outline-none focus:shadow-outline font-medium h-12 hover:bg-gray-900 inline-flex items-center justify-center px-6 text-white tracking-wide transition">Apply coupon</button>
+                    </div>
+                </div>
+                <div className="flex-grow">
+                    <h1 className="text-2xl font-bold mb-6">Cart totals</h1>
+                    <div className="border border-gray-300 p-4 rounded-md">
+                        <div className="flex justify-between py-2">
+                            <span className="font-semibold">Subtotal</span>
+                            <span>${totalAmount}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-t border-gray-300">
+                            <span className="font-semibold">Discount</span>
+                            <span>${discountAmount != null ? discountAmount : 0}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-t border-gray-300">
+                            <span className="font-semibold">Total</span>
+                            <span>${discountAmount != null ? discountAmount : totalAmount}</span>
+                        </div>
+                        <button className="bg-gray-800 duration-200 focus:outline-none focus:shadow-outline font-medium h-12 hover:bg-gray-900 inline-flex items-center justify-center px-6 text-white tracking-wide transition w-full" onClick={proceedToCheckout}>
+                            {
+                                loader ? <Loader /> : 'Proceed to checkout'
+                            }
+                        </button>
+                        {cartError.error && <span class="flex items-center justify-center tracking-wide text-red-500 text-xs mt-2">{cartError.msg}</span>}
+                    </div>
+                </div>
+
+            </div>
+        </ProtectedRoutes>
     );
 };
 

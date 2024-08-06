@@ -15,10 +15,11 @@ const handler = async (req, res) => {
 
 const handleGet = async (req, res) => {
     try {
+        const id = req.query.userId;
         const client = await clientPromise;
         const db = client.db("manga");
-        const allPosts = await db.collection("manga_categories").find({}).toArray();
-        return res.json({ status: 200, data: allPosts });
+        const result = await db.collection("Users").findOne({ 'userId': id });
+        return res.json({ status: 200, data: result, error: false });
     } catch (error) {
         return res.json({ error });
     }

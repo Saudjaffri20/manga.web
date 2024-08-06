@@ -1,37 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import Placeholder from '@/assets/img/placeholder.png'
-import Image from 'next/image'
 import Link from 'next/link'
 import NovelsListingCard from './NovelsListingCard'
 import SignUpModal from './SignUpModal'
-import Cookies from 'js-cookie'
 import LoginModal from './LoginModal'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 import { getToken, setCartListToLocalStorage, getCartListToLocalStorage } from '@/utils/token'
-
-const offeringCard = [
-    {
-        placeholder: Placeholder,
-        label: 'Find Your Favourites',
-        desp: 'Discover our wide range of manga collections, including various genres and themes.',
-    },
-    {
-        placeholder: Placeholder,
-        label: 'Find Your Favourites',
-        desp: 'Discover our wide range of manga collections, including various genres and themes.',
-    },
-    {
-        placeholder: Placeholder,
-        label: 'Find Your Favourites',
-        desp: 'Discover our wide range of manga collections, including various genres and themes.',
-    },
-    {
-        placeholder: Placeholder,
-        label: 'Find Your Favourites',
-        desp: 'Discover our wide range of manga collections, including various genres and themes.',
-    },
-]
+import Loader from './Loader'
 
 const getStarted = [
     {
@@ -91,51 +66,17 @@ const collection = [
     },
 ]
 
-const newRelease = [
-    {
-        url: '/',
-        thumbnail: '1722111306462_thumbnail.webp',
-        realaseTag: 'New Realse',
-        title: 'Astra Lost in Space',
-        price: '10.99',
-        author: 'Masashi Kishimoto',
-        description: 'Follow the adventures of Naruto Uzumaki, a young ninja with dreams of becoming…'
-    },
-    {
-        url: '/',
-        thumbnail: '1722111306462_thumbnail.webp',
-        realaseTag: 'New Realse',
-        title: 'Astra Lost in Space',
-        price: '10.99',
-        author: 'Masashi Kishimoto',
-        description: 'Follow the adventures of Naruto Uzumaki, a young ninja with dreams of becoming…'
-    },
-    {
-        url: '/',
-        thumbnail: '1722111306462_thumbnail.webp',
-        realaseTag: 'New Realse',
-        title: 'Astra Lost in Space',
-        price: '10.99',
-        author: 'Masashi Kishimoto',
-        description: 'Follow the adventures of Naruto Uzumaki, a young ninja with dreams of becoming…'
-    },
-    {
-        url: '/',
-        thumbnail: '1722111306462_thumbnail.webp',
-        realaseTag: 'New Realse',
-        title: 'Astra Lost in Space',
-        price: '10.99',
-        author: 'Masashi Kishimoto',
-        description: 'Follow the adventures of Naruto Uzumaki, a young ninja with dreams of becoming…'
-    },
-]
-
 const LandingPage = () => {
 
     const [openSignUpModal, setOpenSignUpModal] = useState(false);
     const [openLoginModal, setOpenLoginModal] = useState(false);
     const [latestArticle, setLatestArticle] = useState([]);
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        getDataByApi(6);
+    }, [])
 
     const closeSignUpModal = () => {
         setOpenSignUpModal(false);
@@ -183,54 +124,72 @@ const LandingPage = () => {
         }
     }
 
-    useEffect(() => {
-        getDataByApi();
-    }, [])
+    const loadMore = () => {
+        setLoading(true);
+        getDataByApi(14);
+    }
+    // Old Method
+    // const getDataByApi = async (offset) => {
+    //     try {
+    //         const id = Cookies.get('user_id')
+    //         let url = '/api/article';
+    //         let subscription;
+    //         if (id) {
+    //             url = `/api/article?offset=${Number(6)}`;
+    //             subscription = await axios.get(`/api/subscription?userId=${id}`)
+    //         }
+    //         const response = await axios.get(url);
+    //         let cartList = getCartListToLocalStorage();
+    //         if (!response.data.error) {
+    //             if (response.data.data.length > 0 && subscription && subscription != undefined && !subscription.data.error) {
+    //                 const data = response.data.data;
+    //                 for (let index = 0; index < data.length; index++) {
+    //                     if (subscription?.data?.data?.products.includes(data[index].productId)) {
+    //                         data[index].isPaid = true;
+    //                     } else {
+    //                         data[index].isPaid = false;
+    //                     }
+    //                     if (cartList && cartList != null && cartList.includes(data[index].productId)) {
+    //                         data[index].isInCart = true;
+    //                     } else {
+    //                         data[index].isInCart = false;
+    //                     }
+    //                 }
+    //                 setLatestArticle(data);
+    //             } else {
+    //                 const data = response.data.data;
+    //                 const token = getToken();
+    //                 if (token) {
+    //                     for (let index = 0; index < data.length; index++) {
+    //                         if (cartList && cartList != null && cartList.length > 0 && cartList.includes(data[index].productId)) {
+    //                             data[index].isInCart = true;
+    //                         } else {
+    //                             data[index].isInCart = false;
+    //                         }
+    //                     }
+    //                 }
+    //                 setLatestArticle(data);
+    //             }
+    //         } else {
+    //             setLatestArticle(collection);
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
 
-
-    const getDataByApi = async (e) => {
+    const getDataByApi = async (offset) => {
         try {
-            const id = Cookies.get('user_id')
-            let url = '/api/article';
-            let subscription;
-            if (id) {
-                url = `/api/article?userId=${id}`;
-                subscription = await axios.get(`/api/subscription?userId=${id}`)
-            }
-            const response = await axios.get(url);
-            let cartList = getCartListToLocalStorage();
+            const response = await axios.get(`/api/article?offset=${Number(offset)}`);
             if (!response.data.error) {
-                if (response.data.data.length > 0 && subscription && subscription != undefined && !subscription.data.error) {
+                if (response.data.data.length > 0) {
                     const data = response.data.data;
-                    for (let index = 0; index < data.length; index++) {
-                        if (subscription?.data?.data?.products.includes(data[index].productId)) {
-                            data[index].isPaid = true;
-                        } else {
-                            data[index].isPaid = false;
-                        }
-                        if (cartList && cartList != null && cartList.includes(data[index].productId)) {
-                            data[index].isInCart = true;
-                        } else {
-                            data[index].isInCart = false;
-                        }
-                    }
                     setLatestArticle(data);
                 } else {
                     const data = response.data.data;
-                    const token = getToken();
-                    if (token) {
-                        for (let index = 0; index < data.length; index++) {
-                            if (cartList && cartList != null && cartList.length > 0 && cartList.includes(data[index].productId)) {
-                                data[index].isInCart = true;
-                            } else {
-                                data[index].isInCart = false;
-                            }
-                        }
-                    }
                     setLatestArticle(data);
                 }
-            } else {
-                setLatestArticle(collection);
+                setLoading(false);
             }
         } catch (error) {
             console.log(error)
@@ -241,13 +200,13 @@ const LandingPage = () => {
         <>
             <div className='page-manga-1090801'>
                 <section className='home-banner px-20'>
-                    <div className="grid grid-cols-2 relative h-full">
-                        <div className='flex flex-col justify-center'>
+                    <div className="grid grid-cols-1 relative h-full text-center">
+                        <div className='flex flex-col justify-center items-center w-full m-auto' style={{ maxWidth: '770px' }}>
                             <h1 className='mb-4'>Discover Your Next Manga Adventure</h1>
                             <p className='leading-[1.8]'>Welcome to Manga Pointer, your ultimate destination for discovering the best manga novels and series. Whether you’re a seasoned manga enthusiast or a newcomer, we’ve got you covered with curated collections, insightful reviews, and the latest releases.</p>
                             <div className='flex gap-8 mt-12'>
-                                <button className='general-fill-btn py-4 px-8' >Start Exploring Now</button>
-                                <button className='general-fill-btn on-hover py-4 px-8'>Browse Collection</button>
+                                <button onClick={() => setOpenSignUpModal(true)} className='general-fill-btn py-4 px-8' style={{ borderColor: '#fff' }} >Sign Up</button>
+                                <button className='general-fill-btn on-hover py-4 px-8'>Sell Your Manga or Light Novel</button>
                             </div>
                         </div>
                     </div>
@@ -305,7 +264,7 @@ const LandingPage = () => {
                             </div>
                         </div>
                         <div className='col-span-3'>
-                            <div className='border border-[#334155] p-2'>
+                            <div className='border border-[#334155] py-2 px-5'>
                                 <div className='offering-section'>
                                     <h2 className='text-center my-4'>Featured Creators</h2>
                                     <p className='text-center text-[20px] mb-[30px]'>Top Picks and Exciting New Releases</p>
@@ -319,7 +278,11 @@ const LandingPage = () => {
                                     }
                                 </div>
                                 <div className='text-center my-[50px]' >
-                                    <button className='general-fill-btn py-4 px-8 font-medium'>Load More</button>
+                                    <button className='general-fill-btn py-4 px-8 font-medium' onClick={loadMore}>
+                                        {
+                                            loading ? <div className='px-5'><Loader size={15} /></div> : 'Load More'
+                                        }
+                                    </button>
                                 </div>
                                 {/* <div className='bg-[#334155] h-[1px] my-20'></div>
                                 <div className='offering-section'>

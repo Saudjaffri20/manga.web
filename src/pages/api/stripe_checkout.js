@@ -15,9 +15,9 @@ export default async function handler(req, res) {
             const body = await req.body;
             const client = await clientPromise;
             const db = client.db("manga");
-            const result = await db.collection("CheckOut").findOne({ 'userId': body.userId });
+            const result = await db.collection("CheckOut").findOne({ 'checkOutId': body.id });
             // Create a Payment Intent with the order amount and currency
-            let amount = result.totalAmount * 100;
+            let amount = Math.round(result.totalAmount * 100);
             const paymentIntent = await stripe.paymentIntents.create({
                 amount,
                 currency: 'usd',

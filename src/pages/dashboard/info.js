@@ -1,10 +1,10 @@
 import axios from 'axios';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import NovelsListingCard from '../../components/NovelsListingCard';
 import { useRouter } from 'next/router';
 import ProtectedRoutes from '@/components/ProtectedRoutes';
 import Cookies from 'js-cookie'
 import { getToken } from '@/utils/token';
+import Image from 'next/image';
 
 const Info = () => {
 
@@ -12,14 +12,14 @@ const Info = () => {
     const [latestArticle, setLatestArticle] = useState([]);
 
     useEffect(() => {
-        getDataByApi();
+        getDataByApi(14);
     }, [])
 
-    const getDataByApi = async (e) => {
+    const getDataByApi = async (offset) => {
         try {
             const id = Cookies.get('user_id')
             let subscription = await axios.get(`/api/subscription?userId=${id}`)
-            let response = await axios.get(`/api/article?userId=${id}`)
+            let response = await axios.get(`/api/article?offset=${Number(offset)}`);
             if (!response.data.error) {
                 if (response.data.data.length > 0 && subscription && subscription != undefined && !subscription.data.error) {
                     const data = response.data.data;
@@ -42,7 +42,7 @@ const Info = () => {
         }
     }
 
-    const buyNow = (event, item) => {
+    const readEbook = (event, item) => {
         event.preventDefault();
         const token = getToken();
         if (token) {
@@ -66,7 +66,22 @@ const Info = () => {
                             <div className='grid grid-cols-4 gap-5'>
                                 {
                                     latestArticle.map((item, index) => (
-                                        <NovelsListingCard item={item} key={index} buyNow={buyNow} />
+                                        <div className='card relative article-card cursor-pointer' key={index} onClick={(event) => readEbook(event, item)}>
+                                            <div className='border'>
+                                                <Image
+                                                    src={'/images/' + item?.thumbnail}
+                                                    alt={item.title}
+                                                    width={450}
+                                                    height={600}
+                                                    style={{
+                                                        width: "100%"
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="absolute inset-0 bg-gray-800 bg-opacity-50 flex flex-col items-start justify-end opacity-0 hover:opacity-100 transition-opacity duration-300 p-3">
+                                                <h5 className='text-[#fff] text-[20px] font-medium'>{item.title}</h5>
+                                            </div>
+                                        </div>
                                     ))
                                 }
                             </div>

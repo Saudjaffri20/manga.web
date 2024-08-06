@@ -14,25 +14,11 @@ const handler = async (req, res) => {
 
 const handleGet = async (req, res) => {
     try {
-        const offset = Number(req.query.offset);
+        const { slug } = req.query;
         const client = await clientPromise;
         const db = client.db("manga");
-        const result = await db.collection("Product").find({}).limit(offset).toArray();
+        const result = await db.collection("Product").findOne({ 'title': slug });
         return res.json({ status: 200, data: result });
-    } catch (error) {
-        return res.json({ error });
-    }
-};
-
-const handlePost = async (req, res) => {
-    try {
-        const body = await req.body;
-        const client = await clientPromise;
-        const db = client.db("manga");
-        body['createdAt'] = new Date().toUTCString();
-        body['productId'] = Date.now().toString(16);
-        const result = await db.collection("Product").insertOne(body);
-        return res.json({ message: 'submited', error: false });
     } catch (error) {
         return res.json({ error });
     }

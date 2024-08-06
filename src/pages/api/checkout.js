@@ -35,17 +35,22 @@ const handlePost = async (req, res) => {
         const client = await clientPromise;
         const db = client.db("manga");
         body['totalAmount'] = body.totalAmount;
-        const isUserExists = await db.collection("CheckOut").findOne({ 'userId': body.userId });
-        if (isUserExists) {
-            const products = body['products'];
-            await db.collection("CheckOut").updateOne(
-                { "_id": Object(isUserExists._id) },
-                { "$set": { products: products } },
-            );
-        } else {
-            await db.collection("CheckOut").insertOne(body);
-        }
-        return res.json({ message: 'Payment Added', error: false });
+        const checkOutId = new Date().toISOString().split('T')[0].split('-')[0].slice() + new Date().toISOString().split('T')[0].split('-')[1].slice() + new Date().toISOString().split('T')[0].split('-')[2].slice() + new Date().toISOString().split('T')[1].split(':')[0].slice() + new Date().toISOString().split('T')[1].split(':')[1].slice('.')[0].slice() + new Date().toISOString().split('T')[1].split(':')[2].slice().slice('.')[0].slice();
+        body['checkOutId'] = checkOutId;
+        await db.collection("CheckOut").insertOne(body);
+
+
+        // const isUserExists = await db.collection("CheckOut").findOne({ 'userId': body.userId });
+        // if (isUserExists) {
+        //     const products = body['products'];
+        //     await db.collection("CheckOut").updateOne(
+        //         { "_id": Object(isUserExists._id) },
+        //         { "$set": { products: products } },
+        //     );
+        // } else {
+           
+        // }
+        return res.json({ id: checkOutId, message: 'Payment Added', error: false });
     } catch (error) {
         return res.json({ error });
     }

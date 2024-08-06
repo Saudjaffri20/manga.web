@@ -47,7 +47,6 @@ const handler: NextApiHandler = async (req, res) => {
     // Extract file names from the files object
     const fileNames = Object.values(files).map((file: any) => file[0]?.newFilename || 'No file');
     
-    debugger
     // Respond with file names
     return res.json({ status: 200, data: fileNames, error: false });
 };
